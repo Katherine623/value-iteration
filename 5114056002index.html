@@ -118,6 +118,24 @@
             flex-wrap: wrap;
         }
 
+        .result-block {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f2937;
+            margin: 10px 0 8px;
+        }
+
+        .result-subtitle {
+            margin: 0;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
         /* Optimal path highlighting */
         .optimal-path {
             background-color: #FFFF99 !important;
@@ -273,16 +291,16 @@
     <h1>Grid World</h1>
 
     <div class="setup-container">
-        <label>Enter grid size (between 3 and 10): </label>
-        <input type="number" id="gridSize" class="size-input" min="3" max="10" value="5">
+        <label>輸入網格大小（5 到 9）： </label>
+        <input type="number" id="gridSize" class="size-input" min="5" max="9" value="5">
         <button onclick="generateGrid()">Generate Grid</button>
     </div>
 
     <div id="gridArea" style="display:none;">
-        <h2 id="gridTitle" style="margin-bottom: 15px;">7 x 7 Grid:</h2>
+        <h2 id="gridTitle" style="margin-bottom: 15px;">5 x 5 Grid:</h2>
 
         <div id="instruction" class="instruction">
-            1. Click on a cell to set up the start grid as green.
+            1. 點擊一個格子設定起點（綠色）。
         </div>
 
         <div class="grid-wrapper">
@@ -292,39 +310,72 @@
         <div style="margin-top: 20px; margin-bottom: 30px;">
             <button id="calcBtn" onclick="calculatePolicyAndValue()"
                 style="display:none; padding: 10px 20px; font-size:16px;">
-                Calculate Optimal Policy & Value (Value Iteration)
+                計算 HW1-2 策略評估與 HW1-3 最佳策略
             </button>
             <div id="loading" class="loader"></div>
         </div>
     </div>
 
     <div class="matrices-container" id="resultsContainer" style="display:none;">
-        <!-- Value Matrix -->
-        <div class="matrix-wrapper">
-            <div class="matrix-title">Value Function:</div>
-            <div class="axes-container">
-                <div class="y-axis" id="valYAxis"></div>
-                <div class="matrix-content-wrapper">
-                    <div id="valueMatrix" class="matrix"></div>
-                    <div class="x-axis" id="valXAxis"></div>
+        <div class="result-block">
+            <div class="result-title">HW1-2：隨機策略與策略評估</div>
+            <p class="result-subtitle">顯示每個狀態的隨機行動（↑↓←→）與對應價值函數 V(s)</p>
+            <div class="matrices-container">
+                <div class="matrix-wrapper">
+                    <div class="matrix-title">Random Policy:</div>
+                    <div class="axes-container">
+                        <div class="y-axis" id="randPolYAxis"></div>
+                        <div class="matrix-content-wrapper">
+                            <div id="randomPolicyMatrix" class="matrix"></div>
+                            <div class="x-axis" id="randPolXAxis"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="matrix-wrapper">
+                    <div class="matrix-title">Value Function V(s):</div>
+                    <div class="axes-container">
+                        <div class="y-axis" id="randValYAxis"></div>
+                        <div class="matrix-content-wrapper">
+                            <div id="randomValueMatrix" class="matrix"></div>
+                            <div class="x-axis" id="randValXAxis"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- Policy Matrix -->
-        <div class="matrix-wrapper">
-            <div class="matrix-title">Policy (Optimal Path):</div>
-            <div class="axes-container">
-                <div class="y-axis" id="polYAxis"></div>
-                <div class="matrix-content-wrapper">
-                    <div id="policyMatrix" class="matrix"></div>
-                    <div class="x-axis" id="polXAxis"></div>
+
+        <div class="result-block">
+            <div class="result-title">HW1-3：價值迭代最佳政策</div>
+            <p class="result-subtitle">以 Value Iteration 推導最佳行動並更新價值函數（黃色為最佳路徑）</p>
+            <div class="matrices-container">
+                <div class="matrix-wrapper">
+                    <div class="matrix-title">Optimal Policy:</div>
+                    <div class="axes-container">
+                        <div class="y-axis" id="optPolYAxis"></div>
+                        <div class="matrix-content-wrapper">
+                            <div id="optimalPolicyMatrix" class="matrix"></div>
+                            <div class="x-axis" id="optPolXAxis"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="matrix-wrapper">
+                    <div class="matrix-title">Optimal Value Function V*(s):</div>
+                    <div class="axes-container">
+                        <div class="y-axis" id="optValYAxis"></div>
+                        <div class="matrix-content-wrapper">
+                            <div id="optimalValueMatrix" class="matrix"></div>
+                            <div class="x-axis" id="optValXAxis"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let n = 7;
+        let n = 5;
         let startCell = null;
         let endCell = null;
         let obstacles = [];
@@ -334,8 +385,8 @@
             const sizeInput = document.getElementById('gridSize').value;
             n = parseInt(sizeInput);
 
-            if (isNaN(n) || n < 3 || n > 10) {
-                alert("Please enter a valid number between 3 and 10.");
+            if (isNaN(n) || n < 5 || n > 9) {
+                alert("請輸入 5 到 9 的整數。\n(HW1-1 規範：n 範圍為 5~9)");
                 return;
             }
 
@@ -371,14 +422,14 @@
         function updateInstruction() {
             const inst = document.getElementById('instruction');
             if (!startCell) {
-                inst.innerText = "1. Click on a cell to set up the start grid as green.";
+                inst.innerText = "1. 點擊一個格子設定起點（綠色）。";
             } else if (!endCell) {
-                inst.innerText = "2. Click on a cell to set up the end grid as red.";
+                inst.innerText = "2. 點擊一個格子設定終點（紅色）。";
             } else if (obstacles.length < maxObstacles) {
                 const rem = maxObstacles - obstacles.length;
-                inst.innerText = `3. Click to set ${rem} more obstacle(s) as gray.`;
+                inst.innerText = `3. 請再點擊 ${rem} 個障礙物（灰色），總數需為 n-2 = ${maxObstacles}。`;
             } else {
-                inst.innerText = "Setup complete! You can now calculate policy and value.";
+                inst.innerText = "設定完成！可開始計算 HW1-2（策略評估）與 HW1-3（價值迭代）。";
                 document.getElementById('calcBtn').style.display = 'inline-block';
             }
         }
@@ -407,6 +458,15 @@
         }
 
         async function calculatePolicyAndValue() {
+            if (!startCell || !endCell) {
+                alert('請先設定起點與終點。');
+                return;
+            }
+            if (obstacles.length !== maxObstacles) {
+                alert(`障礙物數量需為 n-2 = ${maxObstacles}。`);
+                return;
+            }
+
             document.getElementById('calcBtn').disabled = true;
             document.getElementById('loading').style.display = 'inline-block';
 
@@ -426,13 +486,14 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error("Server error.");
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || "伺服器計算失敗。");
                 }
 
                 const data = await response.json();
-                renderMatrices(data.value_matrix, data.policy_matrix, data.optimal_path);
+                renderAllResults(data);
             } catch (error) {
-                alert("Error calculating matrices: " + error.message);
+                alert("計算失敗：" + error.message);
                 console.error(error);
             } finally {
                 document.getElementById('calcBtn').disabled = false;
@@ -440,115 +501,127 @@
             }
         }
 
-        function renderMatrices(values, policy, optimalPath) {
+        function getValueRange(matrixData) {
+            const numbers = [];
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const value = matrixData[i][j];
+                    if (value !== 'X' && value !== 'G') {
+                        numbers.push(parseFloat(value));
+                    }
+                }
+            }
+            if (numbers.length === 0) {
+                return { min: 0, max: 0 };
+            }
+            return {
+                min: Math.min(...numbers),
+                max: Math.max(...numbers)
+            };
+        }
+
+        function applyValueColor(cell, val, minVal, maxVal) {
+            if (maxVal === minVal) {
+                cell.classList.add('value-medium');
+                return;
+            }
+
+            const normalized = (val - minVal) / (maxVal - minVal);
+
+            if (normalized >= 0.8) {
+                cell.classList.add('value-low');
+            } else if (normalized >= 0.6) {
+                cell.classList.add('value-medium-low');
+            } else if (normalized >= 0.4) {
+                cell.classList.add('value-medium');
+            } else if (normalized >= 0.2) {
+                cell.classList.add('value-medium-high');
+            } else {
+                cell.classList.add('value-high');
+            }
+        }
+
+        function buildAxes(yAxis, xAxis) {
+            yAxis.innerHTML = '';
+            xAxis.innerHTML = '';
+
+            for (let i = 0; i < n; i++) {
+                const yLabel = document.createElement('div');
+                yLabel.className = 'y-axis-label';
+                yLabel.innerText = `${n - 1 - i}`;
+                yAxis.appendChild(yLabel);
+            }
+
+            for (let j = 0; j < n; j++) {
+                const xLabel = document.createElement('div');
+                xLabel.className = 'x-axis-label';
+                xLabel.innerText = `${j}`;
+                xAxis.appendChild(xLabel);
+            }
+        }
+
+        function renderMatrix(matrixData, type, gridId, yAxisId, xAxisId, pathSet, highlightPath) {
+            const isValue = type === 'value';
+            const grid = document.getElementById(gridId);
+            const yAxis = document.getElementById(yAxisId);
+            const xAxis = document.getElementById(xAxisId);
+
+            const valueRange = isValue ? getValueRange(matrixData) : null;
+
+            grid.style.gridTemplateColumns = `repeat(${n}, 60px)`;
+            grid.innerHTML = '';
+            buildAxes(yAxis, xAxis);
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+
+                    const value = matrixData[i][j];
+                    const isOnPath = highlightPath && pathSet.has(`${i},${j}`);
+
+                    if (value === 'X') {
+                        cell.classList.add('obstacle');
+                    } else if (value === 'G') {
+                        cell.innerText = 'G';
+                        if (isOnPath) {
+                            cell.classList.add('optimal-path');
+                        }
+                    } else if (isValue) {
+                        const val = parseFloat(value);
+                        cell.innerText = Number.isFinite(val) ? val.toFixed(2) : '0.00';
+                        applyValueColor(cell, Number.isFinite(val) ? val : 0, valueRange.min, valueRange.max);
+                    } else {
+                        if (value === '↑') cell.innerHTML = '&#8593;';
+                        else if (value === '↓') cell.innerHTML = '&#8595;';
+                        else if (value === '←') cell.innerHTML = '&#8592;';
+                        else if (value === '→') cell.innerHTML = '&#8594;';
+                        else cell.innerText = value || '';
+
+                        if (isOnPath) {
+                            cell.classList.add('optimal-path');
+                        }
+                    }
+
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function renderAllResults(data) {
             document.getElementById('resultsContainer').style.display = 'flex';
 
-            // Create a set for quick path lookup
             const pathSet = new Set();
-            if (optimalPath) {
-                optimalPath.forEach(([r, c]) => {
+            if (data.optimal_path) {
+                data.optimal_path.forEach(([r, c]) => {
                     pathSet.add(`${r},${c}`);
                 });
             }
 
-            const renderMatrix = (matrixData, type) => {
-                const isValue = type === 'value';
-                const gridId = isValue ? 'valueMatrix' : 'policyMatrix';
-                const yAxisId = isValue ? 'valYAxis' : 'polYAxis';
-                const xAxisId = isValue ? 'valXAxis' : 'polXAxis';
-
-                const grid = document.getElementById(gridId);
-                const yAxis = document.getElementById(yAxisId);
-                const xAxis = document.getElementById(xAxisId);
-
-                grid.style.gridTemplateColumns = `repeat(${n}, 60px)`;
-                grid.innerHTML = '';
-                yAxis.innerHTML = '';
-                xAxis.innerHTML = '';
-
-                // Build Axes
-                // HW Image shows Y-axis from n-1 down to 0 top to bottom
-                for (let i = 0; i < n; i++) {
-                    const yLabel = document.createElement('div');
-                    yLabel.className = 'y-axis-label';
-                    yLabel.innerText = `${n - 1 - i}`;
-                    yAxis.appendChild(yLabel);
-                }
-
-                // X-axis from left to right: 0 to n-1
-                for (let j = 0; j < n; j++) {
-                    const xLabel = document.createElement('div');
-                    xLabel.className = 'x-axis-label';
-                    xLabel.innerText = `${j}`;
-                    xAxis.appendChild(xLabel);
-                }
-
-                for (let i = 0; i < n; i++) {
-                    for (let j = 0; j < n; j++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'cell';
-
-                        // Check if this cell is on optimal path (only for policy matrix)
-                        const isOnPath = !isValue && pathSet.has(`${i},${j}`);
-
-                        // We map visual row 'i' directly directly.
-                        if (matrixData[i][j] === 'X') {
-                            cell.classList.add('obstacle');
-                        } else if (matrixData[i][j] === 'G') {
-                            if (isValue) {
-                                cell.innerText = '0.00';
-                                cell.classList.add('value-end');
-                            } else {
-                                cell.innerText = 'end';
-                                if (isOnPath) {
-                                    cell.classList.add('optimal-path');
-                                }
-                            }
-                        } else {
-                            if (isValue) {
-                                const val = parseFloat(matrixData[i][j]);
-                                cell.innerText = val.toFixed(2);
-                                
-                                // Apply color based on value (assuming values are negative)
-                                // More negative = farther from goal = greener
-                                // Less negative = closer to goal = redder
-                                const absVal = Math.abs(val);
-                                if (absVal >= 15) {
-                                    cell.classList.add('value-high'); // Green
-                                } else if (absVal >= 12) {
-                                    cell.classList.add('value-medium-high'); // Light blue
-                                } else if (absVal >= 9) {
-                                    cell.classList.add('value-medium'); // Blue
-                                } else if (absVal >= 5) {
-                                    cell.classList.add('value-medium-low'); // Light pink
-                                } else {
-                                    cell.classList.add('value-low'); // Pink
-                                }
-                            } else {
-                                // For policy, we want arrows looking like the picture
-                                const act = matrixData[i][j];
-                                // We'll map arrows strictly: ↑, ↓, ←, →
-                                // Or Unicode lines: 
-                                if (act === '↑') cell.innerHTML = '&#8593;';
-                                else if (act === '↓') cell.innerHTML = '&#8595;';
-                                else if (act === '←') cell.innerHTML = '&#8592;';
-                                else if (act === '→') cell.innerHTML = '&#8594;';
-                                else cell.innerText = act;
-                                
-                                // Highlight optimal path
-                                if (isOnPath) {
-                                    cell.classList.add('optimal-path');
-                                }
-                            }
-                        }
-                        // HW image has no blue borders on obstacles, they are solidly gray with black outer borders.
-                        grid.appendChild(cell);
-                    }
-                }
-            };
-
-            renderMatrix(values, 'value');
-            renderMatrix(policy, 'policy');
+            renderMatrix(data.random_policy_matrix, 'policy', 'randomPolicyMatrix', 'randPolYAxis', 'randPolXAxis', pathSet, false);
+            renderMatrix(data.random_value_matrix, 'value', 'randomValueMatrix', 'randValYAxis', 'randValXAxis', pathSet, false);
+            renderMatrix(data.optimal_policy_matrix, 'policy', 'optimalPolicyMatrix', 'optPolYAxis', 'optPolXAxis', pathSet, true);
+            renderMatrix(data.optimal_value_matrix, 'value', 'optimalValueMatrix', 'optValYAxis', 'optValXAxis', pathSet, false);
 
             document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
         }

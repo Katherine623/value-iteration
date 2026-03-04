@@ -1,13 +1,16 @@
 # Grid World Value Iteration
 
-HW1-3: 使用價值迭代演算法實現網格世界最優策略求解
+Flask 網頁應用：完整實作 HW1-1、HW1-2、HW1-3
 
 ## 功能特點
 
-- ✅ 價值迭代演算法實現
+- ✅ HW1-1：可設定 n×n 網格（n 範圍 5~9）
+- ✅ 滑鼠點擊設定起點（綠色）與終點（紅色）
+- ✅ 依規範設定障礙物數量為 n-2（灰色）
+- ✅ HW1-2：隨機策略（↑↓←→）與策略評估 V(s)
+- ✅ HW1-3：價值迭代求最佳政策與最佳價值函數 V*(s)
 - ✅ 最優路徑黃色高亮顯示
 - ✅ 價值函數顏色漸變可視化（綠→藍→紅）
-- ✅ 互動式網格設置（3×3 到 10×10）
 - ✅ Flask 後端 + HTML/CSS/JS 前端
 
 ## 線上演示
@@ -42,15 +45,15 @@ http://localhost:5000
 
 ## 使用說明
 
-1. 輸入網格大小（3-10）
+1. 輸入網格大小（5-9）
 2. 點擊 "Generate Grid"
 3. 設置起始點（點擊一次，綠色）
 4. 設置終點（點擊一次，紅色）
-5. 設置障礙物（點擊多次，灰色）
-6. 點擊 "Calculate Optimal Policy & Value"
+5. 設置障礙物（點擊多次，灰色，總數為 n-2）
+6. 點擊「計算 HW1-2 策略評估與 HW1-3 最佳策略」
 7. 查看結果：
-   - Policy Matrix：顯示最優策略，黃色為最優路徑
-   - Value Function：顯示狀態價值，顏色漸變
+   - HW1-2：Random Policy + Value Function V(s)
+   - HW1-3：Optimal Policy + Optimal Value Function V*(s)
 
 ## 技術棧
 
