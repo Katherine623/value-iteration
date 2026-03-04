@@ -32,6 +32,20 @@ python app.py
 http://localhost:5000
 ```
 
+## 區網分享（同一個 Wi‑Fi / 區域網路）
+
+若要讓他人在同一個網路中打開你的 Flask 服務，請依序操作：
+
+1. 在本機啟動 Flask（本專案已設定 `host=0.0.0.0`）
+2. 查詢你的內網 IP（例如 `192.168.1.23`）
+   - Windows 可在命令列執行：`ipconfig`
+3. 請對方使用 `http://你的內網IP:5000` 開啟
+   - 例如：`http://192.168.1.23:5000`
+4. Windows 防火牆需允許 5000 連接埠
+   - 第一次啟動時若跳出防火牆視窗，請允許 Python / Flask 存取
+
+> 注意：`localhost` 只代表你自己的電腦，其他人無法直接使用你的 `http://localhost:5000`。
+
 ## 部署到 Render.com
 
 1. Fork 此儲存庫
