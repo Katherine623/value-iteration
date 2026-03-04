@@ -12,7 +12,9 @@ HW1-3: 使用价值迭代算法实现网格世界最优策略求解
 
 ## 在线演示
 
-部署在：[Render.com](https://value-iteration.onrender.com) 或 [Railway](https://value-iteration.up.railway.app)
+🚀 **实时演示**：https://value-iteration.onrender.com/
+
+已部署在 Render.com
 
 ## 本地运行
 
