@@ -1,14 +1,75 @@
-from flask import Flask, render_template, request, jsonify
-import random
+from flask import Flask, request, jsonify, send_file
 import copy
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)
 
 @app.route('/')
 def index():
-    return render_template('5114056002index.html')
+    # 直接从当前目录提供HTML文件
+    html_file = os.path.join(os.path.dirname(__file__), '5114056002index.html')
+    return send_file(html_file)
+
+def value_iteration(n, start_state, end_state, obstacles, actions, action_symbols, gamma=0.9, theta=1e-4):
+    """
+    Perform value iteration to find optimal policy and value function.
+    Returns optimal policy and value function.
+    """
+    V = { (r, c): 0.0 for r in range(n) for c in range(n) }
+    policy = {}
+    
+    iteration = 0
+    while True:
+        delta = 0
+        
+        # Policy Evaluation
+        for r in range(n):
+            for c in range(n):
+                s = (r, c)
+                state_list = [r, c]
+                
+                if state_list == end_state or state_list in obstacles:
+                    continue
+                
+                old_v = V[s]
+                
+                # Find best action
+                action_values = []
+                for a_idx in range(len(actions)):
+                    dr, dc = actions[a_idx]
+                    next_r, next_c = r + dr, c + dc
+                    next_state_list = [next_r, next_c]
+                    
+                    reward = -1.0
+                    
+                    if 0 <= next_r < n and 0 <= next_c < n and next_state_list not in obstacles:
+                        next_s = (next_r, next_c)
+                        if next_state_list == end_state:
+                            q_value = reward + gamma * 0.0
+                        else:
+                            q_value = reward + gamma * V[next_s]
+                    else:
+                        next_s = s
+                        q_value = reward + gamma * V[next_s]
+                    
+                    action_values.append(q_value)
+                
+                # Select best action
+                best_action = action_values.index(max(action_values))
+                V[s] = max(action_values)
+                policy[s] = best_action
+                
+                delta = max(delta, abs(old_v - V[s]))
+        
+        if delta < theta:
+            break
+        iteration += 1
+        if iteration > 1000:
+            break
+    
+    return policy, V
 
 @app.route('/api/evaluate', methods=['POST'])
 def evaluate():
@@ -22,19 +83,45 @@ def evaluate():
     if end_state: end_state = [int(end_state[0]), int(end_state[1])]
     obstacles = [[int(o[0]), int(o[1])] for o in obstacles]
 
-    # Directions matching standard RL grid logic.
-    # Note: the y-axis in the HW image seems reversed (bottom is 0, top is n-1)
-    # But usually grids are represented top-to-bottom. We will keep standard top-to-bottom r,c and handle drawing on frontend.
-    # r increases downwards, c increases left-to-right
-    # 0: Up (row-1), 1: Down (row+1), 2: Left (col-1), 3: Right (col+1)
+    # Actions: 0: Up, 1: Down, 2: Left, 3: Right
     actions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    # Unicode: Up, Down, Left, Right
     action_symbols = ['↑', '↓', '←', '→']
-
-    policy = {}
-    policy_matrix = [['' for _ in range(n)] for _ in range(n)]
     
-    # 1. Random Policy Generation
+    gamma = 0.9
+    theta = 1e-4
+
+    # HW1-3: Value Iteration Algorithm
+    policy, V = value_iteration(n, start_state, end_state, obstacles, actions, action_symbols, gamma, theta)
+
+    # Calculate optimal path from start to end
+    optimal_path = []
+    if start_state and end_state:
+        current = tuple(start_state)
+        optimal_path.append(list(current))
+        visited = set()
+        max_steps = n * n  # Prevent infinite loops
+        
+        while list(current) != end_state and len(optimal_path) < max_steps:
+            if current in visited:
+                break
+            visited.add(current)
+            
+            if current in policy:
+                action_idx = policy[current]
+                dr, dc = actions[action_idx]
+                next_r, next_c = current[0] + dr, current[1] + dc
+                
+                # Check if next state is valid
+                if 0 <= next_r < n and 0 <= next_c < n and [next_r, next_c] not in obstacles:
+                    current = (next_r, next_c)
+                    optimal_path.append(list(current))
+                else:
+                    break
+            else:
+                break
+
+    # Build policy matrix
+    policy_matrix = [['' for _ in range(n)] for _ in range(n)]
     for r in range(n):
         for c in range(n):
             state = [r, c]
@@ -43,61 +130,9 @@ def evaluate():
             elif state == end_state:
                 policy_matrix[r][c] = 'G'
             else:
-                act_idx = random.choice([0, 1, 2, 3])
-                policy[(r, c)] = act_idx
-                policy_matrix[r][c] = action_symbols[act_idx]
-
-    # 2. Iterative Policy Evaluation
-    gamma = 0.9 # Discount factor default (standard value)
-    theta = 1e-4
-    
-    V = { (r, c): 0.0 for r in range(n) for c in range(n) }
-    
-    iteration = 0
-    while True:
-        delta = 0
-        new_V = copy.deepcopy(V)
-        
-        for r in range(n):
-            for c in range(n):
-                s = (r, c)
-                state_list = [r, c]
-                
-                if state_list == end_state or state_list in obstacles:
-                    continue
-                
-                a_idx = policy[s]
-                dr, dc = actions[a_idx]
-                next_r, next_c = r + dr, c + dc
-                next_state_list = [next_r, next_c]
-                
-                # Standard Gridworld reward structure matching general textbook examples (like Sutton & Barto):
-                # -1 per step. Goal provides no penalty (or positive reward).
-                # But let's use -1 per step, 0 to goal.
-                reward = -1.0
-                
-                # Check boundaries and obstacles
-                if 0 <= next_r < n and 0 <= next_c < n and next_state_list not in obstacles:
-                    next_s = (next_r, next_c)
-                    if next_state_list == end_state:
-                        # Reaching goal
-                        v_expected = reward + gamma * 0.0 # Goal state value is 0
-                    else:
-                        v_expected = reward + gamma * V[next_s]
-                else:
-                    # Bump into wall/obstacle: state doesn't change
-                    next_s = s 
-                    v_expected = reward + gamma * V[next_s]
-                
-                new_V[s] = v_expected
-                delta = max(delta, abs(v_expected - V[s]))
-                
-        V = new_V
-        if delta < theta:
-            break
-        iteration += 1
-        if iteration > 1000:
-            break
+                if (r, c) in policy:
+                    act_idx = policy[(r, c)]
+                    policy_matrix[r][c] = action_symbols[act_idx]
 
     # Prepare return Value Matrix
     value_matrix = [[0.0 for _ in range(n)] for _ in range(n)]
@@ -109,11 +144,12 @@ def evaluate():
             elif state_list == end_state:
                 value_matrix[r][c] = 0.0
             else:
-                value_matrix[r][c] = round(V[(r, c)], 2)
+                value_matrix[r][c] = round(V.get((r, c), 0.0), 2)
                 
     return jsonify({
         'value_matrix': value_matrix,
-        'policy_matrix': policy_matrix
+        'policy_matrix': policy_matrix,
+        'optimal_path': optimal_path
     })
 
 if __name__ == '__main__':
