@@ -1,58 +1,58 @@
 # Grid World Value Iteration
 
-HW1-3: 使用价值迭代算法实现网格世界最优策略求解
+HW1-3: 使用價值迭代演算法實現網格世界最優策略求解
 
-## 功能特点
+## 功能特點
 
-- ✅ 价值迭代算法实现
-- ✅ 最优路径黄色高亮显示
-- ✅ 价值函数颜色渐变可视化（绿→蓝→红）
-- ✅ 交互式网格设置（3×3 到 10×10）
-- ✅ Flask 后端 + HTML/CSS/JS 前端
+- ✅ 價值迭代演算法實現
+- ✅ 最優路徑黃色高亮顯示
+- ✅ 價值函數顏色漸變可視化（綠→藍→紅）
+- ✅ 互動式網格設置（3×3 到 10×10）
+- ✅ Flask 後端 + HTML/CSS/JS 前端
 
-## 在线演示
+## 線上演示
 
-🚀 **实时演示**：https://value-iteration.onrender.com/
+🚀 **實時演示**：https://value-iteration.onrender.com/
 
 已部署在 Render.com
 
-## 本地运行
+## 本地執行
 
 ```bash
-# 安装依赖
+# 安裝依賴
 pip install -r requirements.txt
 
-# 运行应用
+# 執行應用
 python app.py
 
-# 访问
+# 訪問
 http://localhost:5000
 ```
 
 ## 部署到 Render.com
 
-1. Fork 此仓库
-2. 在 [Render.com](https://render.com) 注册账号
-3. 创建 New Web Service
-4. 连接你的 GitHub 仓库
-5. 使用以下设置：
+1. Fork 此儲存庫
+2. 在 [Render.com](https://render.com) 註冊帳號
+3. 建立 New Web Service
+4. 連接你的 GitHub 儲存庫
+5. 使用以下設置：
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `gunicorn app:app`
-6. 点击 Deploy
+6. 點擊 Deploy
 
-## 使用说明
+## 使用說明
 
-1. 输入网格大小（3-10）
-2. 点击 "Generate Grid"
-3. 设置起始点（点击一次，绿色）
-4. 设置终点（点击一次，红色）
-5. 设置障碍物（点击多次，灰色）
-6. 点击 "Calculate Optimal Policy & Value"
-7. 查看结果：
-   - Policy Matrix：显示最优策略，黄色为最优路径
-   - Value Function：显示状态价值，颜色渐变
+1. 輸入網格大小（3-10）
+2. 點擊 "Generate Grid"
+3. 設置起始點（點擊一次，綠色）
+4. 設置終點（點擊一次，紅色）
+5. 設置障礙物（點擊多次，灰色）
+6. 點擊 "Calculate Optimal Policy & Value"
+7. 查看結果：
+   - Policy Matrix：顯示最優策略，黃色為最優路徑
+   - Value Function：顯示狀態價值，顏色漸變
 
-## 技术栈
+## 技術棧
 
 - Python 3.12
 - Flask 3.0
@@ -61,4 +61,4 @@ http://localhost:5000
 
 ## 作者
 
-学号: 5114056002
+學號: 5114056002
