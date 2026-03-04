@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <title>HW1-1 & HW1-2 Grid Map & Policy Evaluation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #333;
+        }
+
+        .setup-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .size-input {
+            padding: 5px;
+            width: 60px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .instruction {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #0056b3;
+            font-weight: bold;
+        }
+
+        .grid-wrapper {
+            margin-bottom: 30px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 0;
+            border: 1px solid #333;
+            /* outer border slightly thinner */
+            width: fit-content;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            box-sizing: border-box;
+            background-color: transparent;
+        }
+
+        .cell:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Setup Grid Colors matching HW1-1 requirements */
+        .start {
+            background-color: #28a745 !important;
+            color: white !important;
+            font-weight: bold;
+            border-color: #333;
+        }
+
+        .end {
+            background-color: #dc3545 !important;
+            color: white !important;
+            font-weight: bold;
+            border-color: #333;
+        }
+
+        .obstacle {
+            background-color: #7b7b7b !important;
+            color: white !important;
+            border-color: #333;
+        }
+
+        /* Results Display matching HW1-2 requirements */
+        .matrices-container {
+            display: flex;
+            gap: 50px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .matrix-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .matrix-title {
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Container with axes */
+        .axes-container {
+            display: flex;
+        }
+
+        /* Y-axis wrapper */
+        .y-axis {
+            display: flex;
+            flex-direction: column;
+            /* To make rows increment from bottom-up visually */
+            justify-content: space-around;
+            padding-right: 10px;
+            font-size: 12px;
+            color: #333;
+            /* Border representing the y-axis line */
+            border-right: 2px solid #333;
+            margin-right: 5px;
+        }
+
+        .y-axis-label {
+            height: 60px;
+            /* match matrix cell height */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 5px;
+        }
+
+        /* Main matrix container */
+        .matrix-content-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* The data grid */
+        .matrix {
+            display: grid;
+            gap: 0;
+            border: 1px solid #1f77b4;
+            /* blue outer bound similar to image */
+        }
+
+        .matrix .cell {
+            width: 60px;
+            height: 60px;
+            cursor: default;
+            color: #333;
+            /* black font */
+            border: 1px solid #1f77b4;
+            /* inner blueish borders */
+            font-size: 14px;
+        }
+
+        .matrix .cell:hover {
+            background-color: transparent;
+        }
+
+        .matrix .obstacle {
+            background-color: #7f7f7f !important;
+            /* solid gray matching HW pic */
+            border: 1px solid #333;
+            /* dark border for blocks */
+            color: transparent !important;
+        }
+
+        /* X-axis wrapper */
+        .x-axis {
+            display: flex;
+            padding-top: 5px;
+            margin-top: 5px;
+        }
+
+        .x-axis-label {
+            width: 60px;
+            /* match matrix cell width */
+            text-align: center;
+            font-size: 12px;
+            color: #333;
+        }
+
+        /* Loading spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Generate n x n Square</h1>
+
+    <div class="setup-container">
+        <label>Enter a number between 5 and 9: </label>
+        <input type="number" id="gridSize" class="size-input" min="5" max="9" value="7">
+        <button onclick="generateGrid()">Generate Square</button>
+    </div>
+
+    <div id="gridArea" style="display:none;">
+        <h2 id="gridTitle" style="margin-bottom: 15px;">7 x 7 Square:</h2>
+
+        <div id="instruction" class="instruction">
+            1. Click on a cell to set up the start grid as green.
+        </div>
+
+        <div class="grid-wrapper">
+            <div id="mainGrid" class="grid"></div>
+        </div>
+
+        <div style="margin-top: 10px; margin-bottom: 30px;">
+            <button id="calcBtn" onclick="calculatePolicyAndValue()"
+                style="display:none; padding: 10px 20px; font-size:16px;">
+                Calculate Policy & Value
+            </button>
+            <div id="loading" class="loader"></div>
+        </div>
+    </div>
+
+    <div class="matrices-container" id="resultsContainer" style="display:none;">
+        <!-- Value Matrix -->
+        <div class="matrix-wrapper">
+            <div class="matrix-title">Value Matrix</div>
+            <div class="axes-container">
+                <div class="y-axis" id="valYAxis"></div>
+                <div class="matrix-content-wrapper">
+                    <div id="valueMatrix" class="matrix"></div>
+                    <div class="x-axis" id="valXAxis"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Policy Matrix -->
+        <div class="matrix-wrapper">
+            <div class="matrix-title">Policy Matrix</div>
+            <div class="axes-container">
+                <div class="y-axis" id="polYAxis"></div>
+                <div class="matrix-content-wrapper">
+                    <div id="policyMatrix" class="matrix"></div>
+                    <div class="x-axis" id="polXAxis"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let n = 7;
+        let startCell = null;
+        let endCell = null;
+        let obstacles = [];
+        let maxObstacles = 0;
+
+        function generateGrid() {
+            const sizeInput = document.getElementById('gridSize').value;
+            n = parseInt(sizeInput);
+
+            if (isNaN(n) || n < 5 || n > 9) {
+                alert("Please enter a valid number between 5 and 9.");
+                return;
+            }
+
+            maxObstacles = n - 2;
+            startCell = null;
+            endCell = null;
+            obstacles = [];
+
+            document.getElementById('gridArea').style.display = 'block';
+            document.getElementById('gridTitle').innerText = `${n} x ${n} Square:`;
+            document.getElementById('calcBtn').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+
+            const gridElement = document.getElementById('mainGrid');
+            gridElement.style.gridTemplateColumns = `repeat(${n}, 50px)`;
+            gridElement.innerHTML = '';
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.innerText = (i * n + j + 1);
+                    cell.dataset.r = i;
+                    cell.dataset.c = j;
+                    cell.onclick = () => handleCellClick(cell, i, j);
+                    gridElement.appendChild(cell);
+                }
+            }
+
+            updateInstruction();
+        }
+
+        function updateInstruction() {
+            const inst = document.getElementById('instruction');
+            if (!startCell) {
+                inst.innerText = "1. Click on a cell to set up the start grid as green.";
+            } else if (!endCell) {
+                inst.innerText = "2. Click on a cell to set up the end grid as red.";
+            } else if (obstacles.length < maxObstacles) {
+                const rem = maxObstacles - obstacles.length;
+                inst.innerText = `3. Click to set ${rem} more obstacle(s) as gray.`;
+            } else {
+                inst.innerText = "Setup complete! You can now calculate policy and value.";
+                document.getElementById('calcBtn').style.display = 'inline-block';
+            }
+        }
+
+        function handleCellClick(cellElem, r, c) {
+            const stateId = `${r},${c}`;
+
+            if (!startCell) {
+                startCell = stateId;
+                cellElem.classList.add('start');
+                updateInstruction();
+            }
+            else if (!endCell && stateId !== startCell) {
+                endCell = stateId;
+                cellElem.classList.add('end');
+                updateInstruction();
+            }
+            else if (obstacles.length < maxObstacles && stateId !== startCell && stateId !== endCell) {
+                if (!obstacles.includes(stateId)) {
+                    obstacles.push(stateId);
+                    cellElem.classList.add('obstacle');
+                    cellElem.innerText = '';
+                    updateInstruction();
+                }
+            }
+        }
+
+        async function calculatePolicyAndValue() {
+            document.getElementById('calcBtn').disabled = true;
+            document.getElementById('loading').style.display = 'inline-block';
+
+            const reqData = {
+                n: n,
+                start: startCell.split(',').map(Number),
+                end: endCell.split(',').map(Number),
+                obstacles: obstacles.map(coord => coord.split(',').map(Number))
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reqData)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server error.");
+                }
+
+                const data = await response.json();
+                renderMatrices(data.value_matrix, data.policy_matrix);
+            } catch (error) {
+                alert("Error calculating matrices: " + error.message);
+                console.error(error);
+            } finally {
+                document.getElementById('calcBtn').disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function renderMatrices(values, policy) {
+            document.getElementById('resultsContainer').style.display = 'flex';
+
+            const renderMatrix = (matrixData, type) => {
+                const isValue = type === 'value';
+                const gridId = isValue ? 'valueMatrix' : 'policyMatrix';
+                const yAxisId = isValue ? 'valYAxis' : 'polYAxis';
+                const xAxisId = isValue ? 'valXAxis' : 'polXAxis';
+
+                const grid = document.getElementById(gridId);
+                const yAxis = document.getElementById(yAxisId);
+                const xAxis = document.getElementById(xAxisId);
+
+                grid.style.gridTemplateColumns = `repeat(${n}, 60px)`;
+                grid.innerHTML = '';
+                yAxis.innerHTML = '';
+                xAxis.innerHTML = '';
+
+                // Build Axes
+                // HW Image shows Y-axis from n-1 down to 0 top to bottom
+                for (let i = 0; i < n; i++) {
+                    const yLabel = document.createElement('div');
+                    yLabel.className = 'y-axis-label';
+                    yLabel.innerText = `${n - 1 - i}`;
+                    yAxis.appendChild(yLabel);
+                }
+
+                // X-axis from left to right: 0 to n-1
+                for (let j = 0; j < n; j++) {
+                    const xLabel = document.createElement('div');
+                    xLabel.className = 'x-axis-label';
+                    xLabel.innerText = `${j}`;
+                    xAxis.appendChild(xLabel);
+                }
+
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+
+                        // We map visual row 'i' directly directly.
+                        if (matrixData[i][j] === 'X') {
+                            cell.classList.add('obstacle');
+                        } else if (matrixData[i][j] === 'G') {
+                            cell.innerText = isValue ? '10.0' : ''; // Or 0.0, we will match standard HW output formatting
+                        } else {
+                            if (isValue) {
+                                cell.innerText = matrixData[i][j] !== null ? parseFloat(matrixData[i][j]).toFixed(2) : '0.00';
+                            } else {
+                                // For policy, we want arrows looking like the picture
+                                const act = matrixData[i][j];
+                                // We'll map arrows strictly: ↑, ↓, ←, →
+                                // Or Unicode lines: 
+                                if (act === '↑') cell.innerHTML = '&#8593;';
+                                else if (act === '↓') cell.innerHTML = '&#8595;';
+                                else if (act === '←') cell.innerHTML = '&#8592;';
+                                else if (act === '→') cell.innerHTML = '&#8594;';
+                                else cell.innerText = act;
+                            }
+                        }
+                        // HW image has no blue borders on obstacles, they are solidly gray with black outer borders.
+                        grid.appendChild(cell);
+                    }
+                }
+            };
+
+            renderMatrix(values, 'value');
+            renderMatrix(policy, 'policy');
+
+            document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>
