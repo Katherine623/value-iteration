@@ -38,3 +38,6 @@
 4. **計算策略與價值**：
    - 設定完成後，點擊下方出現的「Calculate Policy & Value」按鈕。
    - 系統將會透過 Iterative Policy Evaluation 演算法計算結果，並在畫面最下方渲染出精美的 **Value Matrix** (包含小數點後兩位的數值) 與 **Policy Matrix** (包含上下左右的隨機策略箭頭)。
+
+## 操作介面展示
+![Demo Screenshot](demo.png)
