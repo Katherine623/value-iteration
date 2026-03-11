@@ -17,7 +17,7 @@ Flask 網頁應用：完整實作 HW1-1、HW1-2、HW1-3
 
 🚀 **Flask 完整版 Demo**：https://value-iteration.onrender.com/
 
-🌐 **純 JavaScript Demo（HTML 單檔）**：https://katherine623.github.io/value-iteration/demo_js.html
+🌐 **純 JavaScript Demo（GitHub Pages）**：https://katherine623.github.io/value-iteration/
 
 已部署在 Render.com
 

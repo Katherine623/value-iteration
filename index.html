@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grid World Demo (Pure JS)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <h1>Grid World Demo (Pure JavaScript)</h1>
+    <p class="sub">單檔 HTML 可直接展示，不需 Flask 後端。</p>
+
+    <div class="toolbar">
+      <label for="gridSize">網格 n（5~9）：</label>
+      <input id="gridSize" type="number" min="5" max="9" value="5" />
+      <button id="generateBtn">Generate Grid</button>
+      <button id="resetBtn" class="secondary">Reset</button>
+      <button id="calcBtn" class="success">計算 HW1-2 與 HW1-3</button>
+    </div>
+
+    <p id="hint" class="hint">1. 點擊一格設定起點（綠色）。</p>
+
+    <div id="grid" class="grid"></div>
+
+    <div class="legend">
+      <span><span class="dot" style="background:#2e8b57"></span>起點</span>
+      <span><span class="dot" style="background:#d64545"></span>終點</span>
+      <span><span class="dot" style="background:#7b7b7b"></span>障礙物</span>
+      <span><span class="dot" style="background:#fff3a6"></span>最佳路徑</span>
+    </div>
+
+    <div id="results">
+      <h2 class="section-title">HW1-2：隨機策略 + 策略評估</h2>
+      <p class="section-sub">先隨機產生每個狀態行動，再計算該策略的 V(s)。</p>
+      <div class="matrix-row">
+        <div class="matrix-card">
+          <h3>Random Policy</h3>
+          <div id="randomPolicy" class="matrix"></div>
+        </div>
+        <div class="matrix-card">
+          <h3>Value Function V(s)</h3>
+          <div id="randomValue" class="matrix"></div>
+        </div>
+      </div>
+
+      <h2 class="section-title">HW1-3：Value Iteration 最佳政策</h2>
+      <p class="section-sub">使用價值迭代求最佳行動與最佳價值函數 V*(s)。</p>
+      <div class="matrix-row">
+        <div class="matrix-card">
+          <h3>Optimal Policy</h3>
+          <div id="optimalPolicy" class="matrix"></div>
+        </div>
+        <div class="matrix-card">
+          <h3>Optimal Value Function V*(s)</h3>
+          <div id="optimalValue" class="matrix"></div>
+        </div>
+      </div>
+      <div id="pathInfo" class="path-info"></div>
+    </div>
+  </div>
+</body>
+</html>
